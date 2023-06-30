@@ -1,0 +1,247 @@
+---
+title: "Marketing campaigns of a banking institution"
+output:
+  html_document:
+    df_print: paged
+---
+A - Load the dataset and describe the data including the following:
+
+Data type and structure
+Statistical summary of all attributes
+Breakdown of the data by variables
+
+```{r}
+# Read the data into the data frame
+Bank <- read.csv('/Users/yejijung/Downloads/bank.csv',header=T)
+
+# Check the column headings
+attach(Bank)
+names(Bank)
+
+# Check the data type and structure - 4521 observations of 17 variables
+str(Bank)
+
+# check for missing data - No missing data found
+which(is.na.data.frame(Bank))
+ 
+# Change data type
+ Bank$age <- as.numeric(Bank$age)
+ Bank$duration <- as.numeric(Bank$duration)
+ Bank$campaign <- as.numeric(Bank$campaign)
+ Bank$pdays <- as.numeric(Bank$pdays)
+ Bank$previous <- as.numeric(Bank$previous)
+ Bank$balance <- as.numeric(Bank$balance)
+ 
+str(Bank)
+
+# Statistical summary of all attributes
+ summary(Bank) 
+```
+
+B - Visualize the data including: 
+
+Frequency / distribution plots
+Univariate and Multivariate plots
+
+```{r}
+plot(Bank)
+
+# Histogram of numeric variables
+par(mfrow=c(3,2))
+
+hist(age)
+
+hist(balance)
+
+hist(duration)
+
+hist(campaign)
+
+hist(previous)
+```
+
+```{r}
+# Histogram of numeric variables
+library(inspectdf)
+
+numericCols <- unlist(lapply(Bank, is.numeric))
+show_plot(inspect_num(Bank[,numericCols]))
+```
+```{r}
+# Multivariate Plots - Create pairplots for numeric variables
+
+df<- data.frame(Bank$age, Bank$balance, Bank$campaign, Bank$day, Bank$duration, Bank$pdays, Bank$previous)
+
+pairs(df,panel=panel.smooth)
+
+```
+
+
+```{r}
+#Frequency plots of individual variables
+library(ggplot2)
+
+ggplot(data=Bank) +
+    geom_histogram(mapping=aes(x=age), bins=10) +
+  ggtitle("Distribution of Age") +
+  xlab("Age")
+  
+ggplot(Bank, aes(x = job)) +
+  geom_bar() +
+  ggtitle("Type of job") +
+  coord_flip()
+  
+ggplot(Bank, aes(x = marital)) +
+  geom_bar() +
+  ggtitle("Marital status") 
+  
+ggplot(Bank, aes(x = education)) +
+  geom_bar() +
+  ggtitle("Type of education") 
+  
+ggplot(Bank, aes(x = default)) +
+  geom_bar() +
+  ggtitle("Credit default status") 
+
+ggplot(Bank, aes(x = balance)) +
+  geom_bar() +
+  ggtitle("Contact communication type") 
+  
+ggplot(Bank, aes(x = housing)) +
+  geom_bar() +
+  ggtitle("Count of housing loan") 
+
+ggplot(Bank, aes(x = loan)) +
+  geom_bar() +
+  ggtitle("Count of personal loan") 
+
+ggplot(Bank, aes(x = contact)) +
+  geom_bar() +
+  ggtitle("Contact communication type") 
+
+ggplot(Bank, aes(x = month)) + 
+  geom_bar() +
+  labs(x = "Month",
+       y = "Frequency",
+       title = "Last contact month of the year")
+
+ggplot(Bank, aes(x = day)) +
+  geom_bar() +
+  ggtitle("last contact day of the week") 
+
+
+ggplot(Bank, aes(x = duration)) +
+  geom_bar() +
+  ggtitle("Last contact duration in seconds") 
+
+ggplot(Bank, aes(x = campaign)) +
+  geom_bar() +
+  ggtitle("Number of contacts performed during campaign") 
+
+ggplot(Bank, aes(x = previous)) +
+  geom_bar() +
+  ggtitle("Number of contact that performed before campaign") 
+
+ggplot(Bank, aes(x = poutcome)) +
+  geom_bar() +
+  ggtitle("Outcome of previous marketing campaign") 
+
+ggplot(Bank, aes(x = y)) +
+  geom_bar() +
+  ggtitle("client's number of subscribtion of term deposit") 
+```
+
+```{r}
+# Job vs Campaign 
+ggplot(Bank, aes(x = job, y=campaign, fill = y, label = y)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  ggtitle ("Job vs Campaign")
+
+# Loan vs Campaign - Customers with a personal loan tends to refuse the deposit
+ggplot(Bank, aes(x = loan, y=campaign, fill = y, label = y)) +
+  geom_bar(stat = "identity") +
+  ggtitle ("Loan vs Campaign")
+
+# Housing vs Campaign - Customers without a Housing Loan tends to accept the deposit
+ggplot(Bank, aes(x = housing, y=campaign, fill = y, label = y)) +
+  geom_bar(stat = "identity") +
+  ggtitle ("Housing vs Campaign")
+
+# Month vs Campaign - customers tends to accept more the deposit on summer season (May,June,July,August)
+ggplot(Bank, aes(x = month, y=campaign, fill = y, label = y)) +
+  geom_bar(stat = "identity") +
+  ggtitle ("Month vs Campaign")
+
+# Poutcome vs Campaign - customers who previously accepted the deposit tends to accept the deposit
+ggplot(Bank, aes(x = poutcome, y=campaign, fill = y, label = y)) +
+  geom_bar(stat = "identity") +
+  ggtitle ("Poutcome vs Campaign")
+
+```
+C - Inferential Analysis 
+Predict if the client will subscribe (yes/no) to a term deposit (variable y)
+
+```{r}
+table(Bank['y'])
+
+plot(duration ~ campaign, data=Bank)
+
+duration.campaign.lm <- lm(duration ~ campaign, data = Bank)
+
+summary(duration.campaign.lm)
+```
+
+
+```{r}
+summary(duration)
+#interquartile range = 329-104 = 225
+# outlier = 225 * 1.5 = 337.5
+```
+
+
+
+```{r}
+# Standard two sample T-test
+t.test(duration,campaign)
+```
+
+
+```{r}
+# F-Test
+var.test(duration,campaign)
+```
+
+```{r}
+# Using R for regression
+#Transformation of non-linear responses
+
+x = duration
+y = campaign
+
+plot(x,y)
+
+abline(lm(y~x))
+
+model<-lm(y~x)
+
+summary(model)
+
+# diagnostic plots
+plot(model)
+
+plot(x,y,log="y")
+
+transformed <- lm(log(Bank$duration)~Bank$balance)
+
+summary(transformed)
+
+plot(transformed)
+
+```
+
+```{r}
+#Conclusion
+#From the test result, there is a significant positive relationship between duration and campaign because p-value is lower than 0.001. Based on the transformed normal Q-Q plot, the residuals from our model form an one-to-one line with the theoretical residuals from a perfect model.
+```
+
