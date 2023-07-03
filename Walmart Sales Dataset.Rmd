@@ -1,0 +1,82 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+Walmart <- read.csv("~/Downloads/Walmart dataset.csv",header=T)
+attach(Walmart)
+names(Walmart)
+
+summary(Walmart)
+
+boxplot(Walmart$Holiday_Flag)
+
+boxplot(Weekly_Sales ~ Holiday_Flag, data = Walmart, xlab = "Holiday",
+   ylab = "Weekly sales", main = "Holiday Flags")
+
+```
+```{r}
+ unemploymentt <- ts(Walmart[,'Unemployment'], start = c(2010, 2), end = c(2012,11),frequency = 12)
+plot.ts(unemploymentt)
+grid()
+```
+```{r}
+ts_Tempdata <- ts(Temperature, frequency = 12) 
+Tempdata <- decompose(ts_Tempdata, "multiplicative")
+plot(Tempdata)
+
+plot(Tempdata$trend)
+
+plot(Tempdata$seasonal)
+
+plot(Tempdata$random)
+```
+```{r}
+Unemployment <- ts(Walmart[,'Unemployment'], start = c(2010, 2), end = c(2012,11),frequency = 12)
+plot(Unemployment)
+grid()
+```
+```{r}
+install.packages("pracma")
+
+ library(pracma) 
+Moving_Average<-movavg(Weekly_Sales,n=12, type=c("s")) 
+head(Moving_Average)
+tail(Moving_Average)
+
+plot.ts(Moving_Average)
+grid()
+```
+
+```{r}
+hist(Store)
+hist(Weekly_Sales)
+hist(Holiday_Flag)
+hist(Temperature)
+hist(Fuel_Price)
+hist(CPI)
+hist(Unemployment)
+```
+
+```{r}
+install.packages("smooth")
+library(smooth)
+
+ library(forecast)
+forecast_val<-snaive(Temperature,h=36) #Forecast of next 3 years autoplot(forecast_val)
+autoplot(forecast_val)
+
+
+summary(forecast_val)
+```
+```{r}
+forecast_vala<-snaive(Unemployment,h=36) #Forecast of next 3 years autoplot(forecast_val)
+autoplot(forecast_vala)
+
+
+summary(forecast_vala)
+```
+
+
+
